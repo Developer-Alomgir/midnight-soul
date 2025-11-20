@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midnight Soul | Futuristic Gadgets</title>
+    <!-- Load Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons for aesthetic vectors -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Load Three.js for 3D Hero Scene -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00d9ff; /* Brighter Cyan */
+            --secondary-color: #ff33cc; /* Sharp Magenta */
+            --bg-color: #000000; /* Pure Black */
+            --glow-color: #00d9ff;
+        }
+
+        /* Base Styles and Inter Font */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: #ffffff;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            background-image: radial-gradient(circle at 1% 1%, rgba(255, 255, 255, 0.03) 1px, transparent 0),
+                              radial-gradient(circle at 99% 99%, rgba(255, 255, 255, 0.03) 1px, transparent 0);
+            background-size: 4px 4px;
+        }
+        
+        /* Lightroom Effect: Radial Glows */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            width: 30vw;
+            height: 30vw;
+            border-radius: 50%;
+            filter: blur(200px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+            transition: all 1s ease-in-out;
+        }
+
+        body::before {
+            top: 5vh;
+            left: -10vw;
+            background: var(--primary-color);
+        }
+
+        body::after {
+            bottom: 5vh;
+            right: -10vw;
+            background: var(--secondary-color);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--secondary-color); }
+
+        /* Marquee Speed Definitions */
+        @keyframes marquee-ltr-slow { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes marquee-rtl-slow { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+        @keyframes marquee-ltr-medium { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes marquee-rtl-medium { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+        @keyframes marquee-ltr-fast { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        .marquee-content {
+            display: flex;
+            width: 200%;
+            white-space: nowrap;
+        }
+
+        .marquee-ltr-slow { animation: marquee-ltr-slow 28s linear infinite; }
+        .marquee-rtl-slow { animation: marquee-rtl-slow 28s linear infinite; }
+        .marquee-ltr-medium { animation: marquee-ltr-medium 30s linear infinite; }
+        .marquee-rtl-medium { animation: marquee-rtl-medium 30s linear infinite; }
+        .marquee-ltr-fast { animation: marquee-ltr-fast 18s linear infinite; } 
+
+        .marquee:hover .marquee-content { animation-play-state: paused; }
+        
+        @media (max-width: 768px) {
+            .marquee-content {
+                animation: none !important;
+                width: auto;
+                overflow-x: scroll;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
+            }
+        }
+        
+        /* 3D Card Setup (Now just simple zoom on hover) */
+        .card-3d {
+            transition: transform 0.4s ease-in-out, box-shadow 0.4s ease; /* Adjusted transition for zoom */
+            will-change: transform, box-shadow;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Enhanced Card Hover Effects - ADD SIMPLE ZOOM */
+        .card-3d:hover {
+            transform: scale(1.05); /* Simple Zoom Animation */
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7), 0 0 30px var(--glow-color); 
+        }
+
+        .product-card-scroller {
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid #1f2937;
+        }
+        
+        .product-card-scroller:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px var(--primary-color);
+        }
+
+        .product-card-scroller:hover img {
+            transform: scale(1.1);
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        /* Creative Animated Header Style */
+        .animated-header-border {
+            border-bottom: 2px solid;
+            border-image: linear-gradient(to right, transparent 0%, var(--primary-color) 20%, var(--secondary-color) 80%, transparent 100%) 1;
+            animation: pulse-border 5s infinite alternate;
+        }
+
+        @keyframes pulse-border {
+            0% { border-image-slice: 1; opacity: 0.8; }
+            100% { border-image-slice: 0.5; opacity: 1; }
+        }
+        
+        /* Dynamic Banner Text (Neon removed) */
+        .dynamic-banner-text {
+            transition: color 0.3s;
+        }
+        .dynamic-banner-text:hover {
+            color: #fff; /* Simple white hover */
+        }
+        
+        /* New CSS for 3D Hero Section */
+        #hero-3d-container {
+            position: relative;
+            height: 60vh; /* Adjust height as needed */
+            min-height: 400px;
+            overflow: hidden;
+        }
+        #hero-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+            opacity: 0.8;
+            transition: opacity 1s;
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .text-behind {
+            opacity: 0.05;
+            font-size: clamp(8vw, 15vw, 15vw);
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            color: var(--primary-color);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5; /* Behind foreground text */
+            pointer-events: none;
+        }
+        .text-forward {
+            font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+            font-weight: 800;
+            color: white;
+            z-index: 15; /* In front of 3D object */
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            margin-top: -10vh; /* Positioned relative to center */
+            pointer-events: none;
+        }
+        .site-title-overlay {
+            font-size: clamp(3rem, 6vw, 6rem);
+            font-weight: 900;
+            color: white;
+            z-index: 15;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
+        }
+        .hero-action-area {
+            z-index: 15;
+            margin-top: 10vh;
+            pointer-events: auto; /* Re-enable pointer events for buttons */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main Application Container -->
+    <div id="app" class="min-h-screen">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md shadow-2xl animated-header-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                <!-- Logo -->
+                <a href="#" class="text-3xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-primary-color to-secondary-color">
+                    MIDNIGHT<span class="text-white">SOUL</span>
+                </a>
+
+                <!-- Navigation (Desktop) -->
+                <nav class="hidden md:flex space-x-8 text-lg font-medium">
+                    <a href="#hero" class="text-gray-400 hover:text-primary-color transition duration-300">Home</a>
+                    <a href="#products" class="text-gray-400 hover:text-primary-color transition duration-300">Gadgets</a>
+                    <!-- New Page/Section Links -->
+                    <a href="#" class="text-gray-400 hover:text-primary-color transition duration-300" onclick="showModal('collections-modal')">Collections</a>
+                    <a href="#" class="text-gray-400 hover:text-primary-color transition duration-300" onclick="showModal('tracking-modal')">Tracking</a>
+                    <a href="#" class="text-gray-400 hover:text-primary-color transition duration-300" onclick="showModal('contract-modal')">Contract</a>
+                </nav>
+
+                <!-- Icons -->
+                <div class="flex items-center space-x-4">
+                    <!-- Search Input -->
+                    <div class="hidden md:block relative">
+                        <input type="text" placeholder="Search tech..." class="bg-gray-900/50 text-white rounded-full py-2 pl-4 pr-10 border border-gray-700 focus:ring-1 focus:ring-primary-color focus:border-primary-color transition duration-300 w-48 shadow-inner">
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-color">
+                            <i data-lucide="search" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- User Profile/Auth Button -->
+                    <button id="auth-btn" onclick="showModal('auth-modal')" class="p-2 rounded-full border border-transparent hover:border-primary-color transition duration-300">
+                        <i data-lucide="user" class="w-6 h-6 text-white hover:text-secondary-color"></i>
+                    </button>
+                    
+                    <!-- Cart Button with Live Counter -->
+                    <button onclick="showModal('cart-modal')" class="p-2 rounded-full border border-transparent hover:border-secondary-color transition duration-300 relative">
+                        <i data-lucide="shopping-cart" class="w-6 h-6 text-white hover:text-primary-color"></i>
+                        <span id="cart-counter" class="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transform translate-x-1/2 -translate-y-1/2 transition-all duration-300 scale-0 shadow-lg shadow-red-800/50">0</span>
+                    </button>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="md:hidden p-2 rounded-full hover:bg-gray-800 transition duration-300">
+                        <i data-lucide="menu" class="w-6 h-6 text-white"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Section -->
+        <main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+
+            <!-- Hero Section (3D Character/Object and Text Overlay) -->
+            <section id="hero" class="mb-20">
+                <div id="hero-3d-container" class="rounded-xl bg-gray-900 border border-primary-color/50 shadow-2xl shadow-primary-color/30">
+                    <!-- 3D Canvas -->
+                    <canvas id="hero-canvas"></canvas>
+                    
+                    <!-- Text Overlays -->
+                    <div class="hero-overlay">
+                        <!-- Text Behind the 3D Character (Simulated Z-index via Opacity/Size) -->
+                        <div class="text-behind select-none">
+                            MIDNIGHT SOUL
+                        </div>
+                        
+                        <!-- Main Content Area -->
+                        <div class="z-10 flex flex-col items-center">
+                            <!-- Text Forward of the 3D Character -->
+                            <p class="text-forward text-transparent bg-clip-text bg-gradient-to-r from-primary-color to-secondary-color mt-[-5vh]">
+                                INTELLIGENCE UNBOUND.
+                            </p>
+                            
+                            <h1 class="site-title-overlay mt-2">
+                                Midnight Soul
+                            </h1>
+                            
+                            <p class="text-xl text-gray-400 mt-4 max-w-lg text-center font-light">
+                                Your portal to the next dimension of technology.
+                            </p>
+                            
+                            <div class="hero-action-area">
+                                <button onclick="document.getElementById('products').scrollIntoView({ behavior: 'smooth' })" class="bg-secondary-color text-gray-900 font-bold py-3 px-8 rounded-lg text-lg transition duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-secondary-color/70">
+                                    Explore Gadgets
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Scrolling Banners (1st Set - Dynamic) - NEON TEXT REMOVED -->
+            <section id="scrolling-banners-top" class="my-16 space-y-4">
+                <h2 class="text-xl font-bold uppercase tracking-widest text-primary-color mb-4">Dynamic Feeds</h2>
+                
+                <!-- Row 1: Promotional Messages (LTR - Slow) -->
+                <div class="marquee border-y-4 border-primary-color/20 py-3 bg-black/50 overflow-hidden shadow-inner shadow-primary-color/10">
+                    <div class="marquee-content marquee-ltr-slow">
+                        <!-- Content repeated to ensure seamless loop -->
+                        <span class="text-4xl font-extrabold tracking-tight text-white mx-10 dynamic-banner-text">★ FREE CYBER-ENCRYPTION SOFTWARE WITH ANY PURCHASE OVER ৳ 20,000 ★</span>
+                        <span class="text-4xl font-extrabold tracking-tight text-primary-color mx-10 dynamic-banner-text">◎ NEW ARRIVALS: ACCESSORIES & WEARABLES JUST DROPPED ◎</span>
+                        <span class="text-4xl font-extrabold tracking-tight text-white mx-10 dynamic-banner-text">⚡ 24-MONTH INTEREST-FREE FINANCING AVAILABLE ⚡</span>
+                        <!-- Repeat content block -->
+                        <span class="text-4xl font-extrabold tracking-tight text-white mx-10 dynamic-banner-text">★ FREE CYBER-ENCRYPTION SOFTWARE WITH ANY PURCHASE OVER ৳ 20,000 ★</span>
+                        <span class="text-4xl font-extrabold tracking-tight text-primary-color mx-10 dynamic-banner-text">◎ NEW ARRIVALS: ACCESSORIES & WEARABLES JUST DROPPED ◎</span>
+                        <span class="text-4xl font-extrabold tracking-tight text-white mx-10 dynamic-banner-text">⚡ 24-MONTH INTEREST-FREE FINANCING AVAILABLE ⚡</span>
+                    </div>
+                </div>
+
+                <!-- Row 2: Product Categories (RTL - Slow) -->
+                <div class="marquee border-y-4 border-secondary-color/20 py-3 bg-black/50 overflow-hidden shadow-inner shadow-secondary-color/10">
+                    <div class="marquee-content marquee-rtl-slow">
+                        <!-- Content repeated to ensure seamless loop -->
+                        <span class="text-4xl font-extrabold tracking-widest text-secondary-color mx-10 dynamic-banner-text">// WEARABLES // NEURAL DEVICES // ROBOTICS // ACCESSORIES //</span>
+                        <span class="text-4xl font-extrabold tracking-widest text-gray-400 mx-10 dynamic-banner-text">/ GAMING / DRONES / POWER / SECURITY / DISPLAY /</span>
+                        <span class="text-4xl font-extrabold tracking-widest text-secondary-color mx-10 dynamic-banner-text">// INPUT / VISUALIZATION // AUDIO // COMPONENTS // FUTURE TECH //</span>
+                         <!-- Repeat content block -->
+                        <span class="text-4xl font-extrabold tracking-widest text-secondary-color mx-10 dynamic-banner-text">// WEARABLES // NEURAL DEVICES // ROBOTICS // ACCESSORIES //</span>
+                        <span class="text-4xl font-extrabold tracking-widest text-gray-400 mx-10 dynamic-banner-text">/ GAMING / DRONES / POWER / SECURITY / DISPLAY /</span>
+                        <span class="text-4xl font-extrabold tracking-widest text-secondary-color mx-10 dynamic-banner-text">// INPUT / VISUALIZATION // AUDIO // COMPONENTS // FUTURE TECH //</span>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 3D Product Showcase (5 Cards) - 3D TILT REMOVED -->
+            <section id="3d-showcase" class="py-16">
+                <h2 class="text-4xl font-extrabold text-center mb-12 text-white border-b-4 border-secondary-color/50 pb-4 inline-block mx-auto shadow-text-md shadow-secondary-color/20">Premium Showcase</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                    
+                    <!-- Product 1 (Blue Gradient) -->
+                    <div data-product-id="101" class="card-3d rounded-xl p-6 h-[400px] flex flex-col justify-between cursor-pointer relative" 
+                         style="background: linear-gradient(135deg, #1e3a8a 0%, #0077ff 100%);"
+                         onclick="showModal('details-modal', products.find(p => p.id === 101))">
+                        <div class="card-content">
+                            <span class="absolute top-4 left-4 bg-yellow-400 text-gray-900 text-xs font-bold py-1 px-3 rounded-full shadow-lg">HOT</span>
+                            <img src="https://placehold.co/400x250/000000/ffffff?text=Holo+Projector" alt="Holo Projector" class="w-full h-32 object-contain mb-4 transition-transform duration-500">
+                            <h3 class="text-2xl font-bold text-white mb-2">Holo Projector V3</h3>
+                            <p class="text-gray-200 text-sm">Create high-res 3D environments instantly.</p>
+                            <span class="text-4xl font-extrabold text-white mt-4 block text-shadow-lg">৳ 32,000</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); addToCart(101)" class="w-full bg-white text-gray-900 font-bold py-2 rounded-lg transition duration-300 hover:bg-gray-200 hover:shadow-xl hover:shadow-white/50">
+                            Add to Cart
+                        </button>
+                    </div>
+
+                    <!-- Product 2 (Pink Gradient) -->
+                    <div data-product-id="102" class="card-3d rounded-xl p-6 h-[400px] flex flex-col justify-between cursor-pointer relative" 
+                         style="background: linear-gradient(135deg, #be185d 0%, #ff33cc 100%);"
+                         onclick="showModal('details-modal', products.find(p => p.id === 102))">
+                        <div class="card-content">
+                            <span class="absolute top-4 left-4 bg-green-400 text-gray-900 text-xs font-bold py-1 px-3 rounded-full shadow-lg">NEW</span>
+                            <img src="https://placehold.co/400x250/000000/ffffff?text=Fusion+Battery" alt="Fusion Battery" class="w-full h-32 object-contain mb-4 transition-transform duration-500">
+                            <h3 class="text-2xl font-bold text-white mb-2">Fusion Power Cell</h3>
+                            <p class="text-gray-200 text-sm">Infinite energy storage in a minimalist cube.</p>
+                            <span class="text-4xl font-extrabold text-white mt-4 block">৳ 18,990</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); addToCart(102)" class="w-full bg-white text-gray-900 font-bold py-2 rounded-lg transition duration-300 hover:bg-gray-200 hover:shadow-xl hover:shadow-white/50">
+                            Add to Cart
+                        </button>
+                    </div>
+                    
+                    <!-- Product 3 (Green Gradient) -->
+                    <div data-product-id="103" class="card-3d rounded-xl p-6 h-[400px] flex flex-col justify-between cursor-pointer relative" 
+                         style="background: linear-gradient(135deg, #16a34a 0%, #4ade80 100%);"
+                         onclick="showModal('details-modal', products.find(p => p.id === 103))">
+                        <div class="card-content">
+                            <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold py-1 px-3 rounded-full shadow-lg">SALE</span>
+                            <img src="https://placehold.co/400x250/000000/ffffff?text=K-Board" alt="K-Board" class="w-full h-32 object-contain mb-4 transition-transform duration-500">
+                            <h3 class="text-2xl font-bold text-white mb-2">Kinetic Keyboard</h3>
+                            <p class="text-gray-200 text-sm">Zero latency input device for pro gamers.</p>
+                            <span class="text-4xl font-extrabold text-white mt-4 block">৳ 8,250</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); addToCart(103)" class="w-full bg-white text-gray-900 font-bold py-2 rounded-lg transition duration-300 hover:bg-gray-200 hover:shadow-xl hover:shadow-white/50">
+                            Add to Cart
+                        </button>
+                    </div>
+                    
+                    <!-- Product 4 (Purple Gradient) -->
+                    <div data-product-id="104" class="card-3d rounded-xl p-6 h-[400px] flex flex-col justify-between cursor-pointer relative" 
+                         style="background: linear-gradient(135deg, #5b21b6 0%, #a78bfa 100%);"
+                         onclick="showModal('details-modal', products.find(p => p.id === 104))">
+                        <div class="card-content">
+                            <span class="absolute top-4 left-4 bg-red-800 text-white text-xs font-bold py-1 px-3 rounded-full shadow-lg">-20%</span>
+                            <img src="https://placehold.co/400x250/000000/ffffff?text=Nano+Ears" alt="Nano Ears" class="w-full h-32 object-contain mb-4 transition-transform duration-500">
+                            <h3 class="text-2xl font-bold text-white mb-2">Nano Earbuds P3</h3>
+                            <p class="text-gray-200 text-sm">Spatial audio with noise cancellation.</p>
+                            <span class="text-4xl font-extrabold text-white mt-4 block">৳ 6,990</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); addToCart(104)" class="w-full bg-white text-gray-900 font-bold py-2 rounded-lg transition duration-300 hover:bg-gray-200 hover:shadow-xl hover:shadow-white/50">
+                            Add to Cart
+                        </button>
+                    </div>
+
+                    <!-- Product 5 (Orange Gradient) -->
+                    <div data-product-id="105" class="card-3d rounded-xl p-6 h-[400px] flex flex-col justify-between cursor-pointer relative" 
+                         style="background: linear-gradient(135deg, #ea580c 0%, #fb923c 100%);"
+                         onclick="showModal('details-modal', products.find(p => p.id === 105))">
+                        <div class="card-content">
+                            <span class="absolute top-4 left-4 bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded-full shadow-lg">TOP</span>
+                            <img src="https://placehold.co/400x250/000000/ffffff?text=Exo+Suit" alt="Exo Suit" class="w-full h-32 object-contain mb-4 transition-transform duration-500">
+                            <h3 class="text-2xl font-bold text-white mb-2">Exo-Suit Module</h3>
+                            <p class="text-gray-200 text-sm">Enhanced strength and durability for work.</p>
+                            <span class="text-4xl font-extrabold text-white mt-4 block">৳ 65,000</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); addToCart(105)" class="w-full bg-white text-gray-900 font-bold py-2 rounded-lg transition duration-300 hover:bg-gray-200 hover:shadow-xl hover:shadow-white/50">
+                            Add to Cart
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Horizontal Scrolling Product Rows (Gadgets & Accessories) -->
+            <section id="products" class="py-16">
+                <h2 class="text-4xl font-extrabold text-center mb-12 text-white border-b-4 border-primary-color/50 pb-4 inline-block mx-auto shadow-text-md shadow-primary-color/20">Explore Latest Gadgets & Accessories</h2>
+                
+                <!-- Product Row 1: LTR (Faster) -->
+                <div class="space-y-4 mb-10">
+                    <h3 class="text-2xl font-semibold text-primary-color">High-Performance Gadgets</h3>
+                    <div class="marquee overflow-hidden py-4 bg-gray-900/50 rounded-xl border border-gray-800 shadow-xl shadow-gray-900/50">
+                        <div id="product-row-1" class="marquee-content marquee-ltr-fast space-x-6 px-3">
+                            <!-- Products will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Row 2: RTL (Medium) -->
+                <div class="space-y-4 mb-10">
+                    <h3 class="text-2xl font-semibold text-secondary-color">Essential Accessories</h3>
+                    <div class="marquee overflow-hidden py-4 bg-gray-900/50 rounded-xl border border-gray-800 shadow-xl shadow-gray-900/50">
+                        <div id="product-row-2" class="marquee-content marquee-rtl-medium space-x-6 px-3">
+                            <!-- Products will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Row 3: LTR (Faster) -->
+                <div class="space-y-4 mb-10">
+                    <h3 class="text-2xl font-semibold text-primary-color">Future Wearables</h3>
+                    <div class="marquee overflow-hidden py-4 bg-gray-900/50 rounded-xl border border-gray-800 shadow-xl shadow-gray-900/50">
+                        <div id="product-row-3" class="marquee-content marquee-ltr-fast space-x-6 px-3">
+                            <!-- Products will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer id="contact" class="bg-black border-t-2 border-gray-800 mt-10">
+             <!-- Scrolling Banners (2nd Set - Footer) -->
+            <section id="scrolling-banners-footer" class="space-y-4 py-8">
+                <!-- Row 1: Product Categories (RTL - Slow) -->
+                <div class="marquee border-y-4 border-secondary-color/20 py-2 bg-black/50 overflow-hidden shadow-inner shadow-secondary-color/10">
+                    <div class="marquee-content marquee-rtl-slow">
+                        <!-- Content repeated to ensure seamless loop -->
+                        <span class="text-xl font-extrabold tracking-widest text-white mx-6 dynamic-banner-text">// WEARABLES // NEURAL DEVICES // ROBOTICS // ACCESSORIES //</span>
+                        <span class="text-xl font-extrabold tracking-widest text-gray-400 mx-6 dynamic-banner-text">/ GAMING / DRONES / POWER / SECURITY / DISPLAY /</span>
+                        <span class="text-xl font-extrabold tracking-widest text-white mx-6 dynamic-banner-text">// INPUT / VISUALIZATION // COMPONENTS // FUTURE TECH //</span>
+                        <!-- Repeat content block -->
+                        <span class="text-xl font-extrabold tracking-widest text-white mx-6 dynamic-banner-text">// WEARABLES // NEURAL DEVICES // ROBOTICS // ACCESSORIES //</span>
+                        <span class="text-xl font-extrabold tracking-widest text-gray-400 mx-6 dynamic-banner-text">/ GAMING / DRONES / POWER / SECURITY / DISPLAY /</span>
+                        <span class="text-xl font-extrabold tracking-widest text-white mx-6 dynamic-banner-text">// INPUT / VISUALIZATION // COMPONENTS // FUTURE TECH //</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-primary-color">Company</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">About Midnight Soul</a></li>
+                        <li><a href="#" class="hover:text-white transition">Partnerships</a></li>
+                        <li><a href="#" class="hover:text-white transition">Newsroom</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-primary-color">Support</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Contact Portal</a></li>
+                        <li><a href="#" class="hover:text-white transition">Warranty Claims</a></li>
+                        <li><a href="#" class="hover:text-white transition">Firmware Updates</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-primary-color">Legal</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition" onclick="showModal('contract-modal')">Privacy Protocol</a></li>
+                        <li><a href="#" class="hover:text-white transition" onclick="showModal('contract-modal')">Terms of Use</a></li>
+                        <li><a href="#" class="hover:text-white transition">Security Audit</a></li>
+                    </ul>
+                </div>
+                <!-- Developer Credit Card -->
+                <div class="md:col-span-1">
+                     <h3 class="text-xl font-bold mb-4 text-primary-color">Developer Credit</h3>
+                    <div class="p-4 rounded-xl bg-gray-900 border border-secondary-color/50 shadow-lg hover:shadow-secondary-color/30 transition duration-500">
+                        <p class="text-lg font-bold text-white">ALOMGIR HOSSEN</p>
+                        <p class="text-sm text-gray-400 mb-2">Architect of Midnight Soul</p>
+                        <a href="https://github.com/yourprofile" target="_blank" class="text-secondary-color hover:text-white flex items-center space-x-1 transition duration-300">
+                            <i data-lucide="github" class="w-4 h-4"></i>
+                            <span>GitHub Profile</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center py-4 border-t border-gray-800">
+                <p class="text-gray-500 text-sm">&copy; 2025 Midnight Soul Systems. All digital rights reserved.</p>
+            </div>
+        </footer>
+
+    </div>
+    
+    <!-- Modals (Simulated Pages) -->
+    
+    <!-- 1. Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="bg-gray-900 border border-primary-color/50 rounded-xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-primary-color/20">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-3">
+                <h2 class="text-3xl font-bold text-primary-color flex items-center"><i data-lucide="shopping-cart" class="w-7 h-7 mr-2"></i> Access Cart</h2>
+                <button onclick="hideModal('cart-modal')" class="p-2 rounded-full hover:bg-gray-800 transition text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div id="cart-items-container" class="space-y-4 min-h-[100px]">
+                <!-- Cart items will be rendered here -->
+            </div>
+            
+            <div id="cart-empty-message" class="text-center text-xl text-gray-400 py-10 hidden">Your cart is empty. Begin your selection.</div>
+
+            <div id="cart-summary" class="mt-6 pt-4 border-t border-gray-700">
+                <div class="flex justify-between text-2xl font-bold mb-4">
+                    <span>Total Cost:</span>
+                    <span id="cart-total-price" class="text-secondary-color">৳ 0</span>
+                </div>
+                <button class="w-full bg-secondary-color text-gray-900 font-bold py-3 rounded-lg text-lg transition duration-300 hover:bg-secondary-color/80 shadow-lg hover:shadow-secondary-color/50">
+                    Authorize Transaction
+                </button>
+                <div class="mt-4 text-center text-sm text-gray-400">Order verification and live tracking will commence upon authorization.</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 2. Product Details Modal -->
+    <div id="details-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="bg-gray-900 border border-secondary-color/50 rounded-xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-secondary-color/20">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-3">
+                <h2 id="details-product-name" class="text-3xl font-bold text-secondary-color">Product Name</h2>
+                <button onclick="hideModal('details-modal')" class="p-2 rounded-full hover:bg-gray-800 transition text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="relative">
+                    <img id="details-product-img" src="" onerror="this.src='https://placehold.co/400x250/101010/ffffff?text=Item'" alt="Product Image" class="w-full rounded-lg object-cover border border-gray-800 shadow-xl shadow-gray-900/50">
+                    <span id="details-product-status" class="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold py-1 px-3 rounded-full shadow-lg">STATUS</span>
+                </div>
+                <div>
+                    <p id="details-product-details" class="text-gray-400 mb-6 text-lg"></p>
+                    <div class="flex items-end justify-between mb-8">
+                        <span id="details-product-price" class="text-5xl font-extrabold text-primary-color">৳ 0</span>
+                        <span class="text-lg text-gray-500">Status: Available</span>
+                    </div>
+                    
+                    <button id="details-add-to-cart-btn" class="w-full bg-primary-color text-gray-900 font-bold py-4 rounded-lg text-xl transition duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary-color/70">
+                        <i data-lucide="plus-circle" class="w-6 h-6 inline-block mr-2"></i> Add to Cart
+                    </button>
+
+                    <div class="mt-8 p-4 bg-gray-800 rounded-lg border border-gray-700">
+                        <h4 class="font-semibold text-white mb-2 flex items-center"><i data-lucide="info" class="w-5 h-5 mr-2 text-secondary-color"></i> Specifications</h4>
+                        <ul class="text-sm text-gray-400 list-disc list-inside space-y-1">
+                            <li>Material: Plasma-Fused Alloys</li>
+                            <li>Interface: Wireless Neural Sync</li>
+                            <li>Integrity: Fully Encrypted Hardware</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 3. Auth/Profile Modal (Sign In/Sign Up/Profile) -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="bg-gray-900 border border-primary-color/50 rounded-xl p-8 w-full max-w-md shadow-2xl shadow-primary-color/20">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-3">
+                <h2 id="auth-title" class="text-3xl font-bold text-primary-color">Access Control</h2>
+                <button onclick="hideModal('auth-modal')" class="p-2 rounded-full hover:bg-gray-800 transition text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div id="auth-content">
+                <!-- Sign In Form -->
+                <form id="sign-in-form" class="space-y-4">
+                    <input type="email" placeholder="Access ID (Email)" class="w-full bg-gray-800 p-3 rounded-lg border border-gray-700 focus:ring-secondary-color focus:border-secondary-color text-white shadow-inner">
+                    <input type="password" placeholder="Passcode" class="w-full bg-gray-800 p-3 rounded-lg border border-gray-700 focus:ring-secondary-color focus:border-secondary-color text-white shadow-inner">
+                    <button type="submit" onclick="simulateLogin(event)" class="w-full bg-secondary-color text-gray-900 font-bold py-3 rounded-lg transition duration-300 hover:bg-secondary-color/80 shadow-lg hover:shadow-secondary-color/50">
+                        Authenticate & Sign In
+                    </button>
+                </form>
+                <button onclick="toggleAuthView('sign-up')" class="mt-4 w-full text-center text-sm text-gray-400 hover:text-primary-color transition">
+                    New User Protocol? Register Account
+                </button>
+            </div>
+            
+            <div id="profile-content" class="hidden space-y-4">
+                <p class="text-gray-400">Identity Confirmed, <span id="profile-user-name" class="font-bold text-primary-color">Cyber_User_01</span>.</p>
+                <div class="p-4 bg-gray-800 rounded-lg border border-gray-700">
+                    <h4 class="font-semibold text-white mb-2">Customer Metrics</h4>
+                    <p class="text-sm text-gray-400">Identifier: <span class="font-mono text-primary-color">user@cyber.net</span></p>
+                    <p class="text-sm text-gray-400">Access Level: <span class="text-green-400">Level 4: Verified</span></p>
+                </div>
+                <div class="p-4 bg-gray-800 rounded-lg border border-gray-700">
+                    <h4 class="font-semibold text-white mb-2">Last Transaction</h4>
+                    <p class="text-sm text-gray-400" id="profile-last-product">No recent orders.</p>
+                </div>
+                <button onclick="simulateLogout()" class="w-full border border-red-600 text-red-600 font-bold py-3 rounded-lg transition duration-300 hover:bg-red-600/20 hover:text-white">
+                    Terminate Session
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 4. Collections Modal (New Page) -->
+    <div id="collections-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="bg-gray-900 border border-secondary-color/50 rounded-xl p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-secondary-color/20">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-3">
+                <h2 class="text-3xl font-bold text-secondary-color flex items-center"><i data-lucide="layout-grid" class="w-7 h-7 mr-2"></i> Premium Collections</h2>
+                <button onclick="hideModal('collections-modal')" class="p-2 rounded-full hover:bg-gray-800 transition text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <p class="text-gray-400 mb-6">Curated sets of high-tier gadgets and accessories, designed for specific user protocols and environments.</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Collection Card 1 -->
+                <div class="p-6 bg-gray-800 rounded-xl border border-primary-color/30 hover:shadow-xl hover:shadow-primary-color/20 transition duration-300">
+                    <h3 class="text-2xl font-bold text-primary-color mb-2">The Cyberneticist's Kit</h3>
+                    <p class="text-gray-400 text-sm mb-4">Includes Bio-Sleeve, Smart Ring X, and Nano Earbuds P3. Optimized for urban augmented reality.</p>
+                    <button class="bg-primary-color text-gray-900 font-bold py-2 px-4 rounded-lg text-sm w-full hover:bg-primary-color/80 transition">View Kit (৳ 23,190)</button>
+                </div>
+                <!-- Collection Card 2 -->
+                <div class="p-6 bg-gray-800 rounded-xl border border-secondary-color/30 hover:shadow-xl hover:shadow-secondary-color/20 transition duration-300">
+                    <h3 class="text-2xl font-bold text-secondary-color mb-2">Deep Space Power Bundle</h3>
+                    <p class="text-gray-400 text-sm mb-4">Fusion Power Cell, Portable Reactor, and Cryo Flask. Sustained operation in isolated environments.</p>
+                    <button class="bg-secondary-color text-gray-900 font-bold py-2 px-4 rounded-lg text-sm w-full hover:bg-secondary-color/80 transition">View Bundle (৳ 65,990)</button>
+                </div>
+                <!-- Collection Card 3 -->
+                <div class="p-6 bg-gray-800 rounded-xl border border-gray-600 hover:shadow-xl hover:shadow-gray-700/20 transition duration-300">
+                    <h3 class="text-2xl font-bold text-white mb-2">Zero Latency Gaming Pack</h3>
+                    <p class="text-gray-400 text-sm mb-4">Kinetic Keyboard, Cyberblade Mouse, and Synth Headset. For competitive edge and immersion.</p>
+                    <button class="bg-white text-gray-900 font-bold py-2 px-4 rounded-lg text-sm w-full hover:bg-gray-200 transition">View Pack (৳ 28,050)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Tracking Modal (New Page) -->
+    <div id="tracking-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="bg-gray-900 border border-primary-color/50 rounded-xl p-8 w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-primary-color/20">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-3">
+                <h2 class="text-3xl font-bold text-primary-color flex items-center"><i data-lucide="send" class="w-7 h-7 mr-2"></i> Shipment Tracking</h2>
+                <button onclick="hideModal('tracking-modal')" class="p-2 rounded-full hover:bg-gray-800 transition text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <p class="text-gray-400 mb-6">Enter your quantum tracking ID to monitor your order in real-time.</p>
+            
+            <div class="flex space-x-2 mb-8">
+                <input type="text" placeholder="Quantum Tracking ID (e.g., QTRK-4930-BETA)" class="flex-grow bg-gray-800 p-3 rounded-lg border border-gray-700 focus:ring-secondary-color focus:border-secondary-color text-white shadow-inner">
+                <button class="bg-secondary-color text-gray-900 font-bold py-3 px-6 rounded-lg transition duration-300 hover:bg-secondary-color/80">
+                    Track
+                </button>
+            </div>
+            
+            <!-- Simulation of Tracking Status -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-white">Order QTRK-4930-BETA Status:</h3>
+                <ol class="relative border-s border-gray-700 ml-4">                  
+                    <li class="mb-8 ms-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-8 ring-gray-900 bg-green-900 text-green-400">
+                           <i data-lucide="check" class="w-4 h-4"></i>
+                        </span>
+                        <h3 class="flex items-center mb-1 text-lg font-semibold text-white">Delivered</h3>
+                        <time class="block mb-2 text-sm font-normal leading-none text-gray-500">21 Nov 2025</time>
+                    </li>
+                    <li class="mb-8 ms-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-8 ring-gray-900 bg-primary-color text-gray-900">
+                           <i data-lucide="truck" class="w-4 h-4"></i>
+                        </span>
+                        <h3 class="mb-1 text-lg font-semibold text-white">In Transit</h3>
+                        <time class="block mb-2 text-sm font-normal leading-none text-gray-500">20 Nov 2025 - Leaving Sector 7</time>
+                    </li>
+                    <li class="ms-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-8 ring-gray-900 bg-gray-700 text-gray-400">
+                           <i data-lucide="package" class="w-4 h-4"></i>
+                        </span>
+                        <h3 class="mb-1 text-lg font-semibold text-white">Order Confirmed</h3>
+                        <time class="block mb-2 text-sm font-normal leading-none text-gray-500">19 Nov 2025</time>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 6. Contract Modal (New Page - For Legal/TOS) -->
+    <div id="contract-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="bg-gray-900 border border-secondary-color/50 rounded-xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-secondary-color/20">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-3">
+                <h2 class="text-3xl font-bold text-secondary-color flex items-center"><i data-lucide="file-text" class="w-7 h-7 mr-2"></i> Security and Legal Contract</h2>
+                <button onclick="hideModal('contract-modal')" class="p-2 rounded-full hover:bg-gray-800 transition text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-primary-color mb-4">Section 1: Data Sovereignty Protocol</h3>
+            <p class="text-gray-400 mb-6 text-sm leading-relaxed">
+                All client data is encrypted using quantum-resistant algorithms (QRA-256) and stored on decentralized, secure servers located in neutral space. Midnight Soul does not share, analyze, or monetize personal biometric or purchasing data. Access logs are purged every 72 hours, maintaining absolute anonymity. Any breach of this protocol shall result in the immediate and irreversible termination of all corporate entities involved and full compensation to the affected parties, payable in stable atomic currency (SAC).
+            </p>
+            
+            <h3 class="text-2xl font-bold text-secondary-color mb-4">Section 2: Terms of Service (Abridged)</h3>
+            <ul class="text-gray-400 mb-6 text-sm list-disc list-inside space-y-2">
+                <li>Usage of Midnight Soul hardware implies acceptance of high-energy output and potential localized space-time distortions.</li>
+                <li>Modification of core hardware voiding the warranty must be registered with the central authority network (CAN).</li>
+                <li>Midnight Soul is not responsible for incidents involving accidental time travel or localized gravity shifts caused by misuse of the Fusion Power Cell.</li>
+            </ul>
+            
+            <p class="text-center text-xs text-gray-500 mt-8">
+                This document is a legally binding contract. Digital signature confirmation is assumed upon browsing this domain.
+            </p>
+        </div>
+    </div>
+
+    <!-- 7. Confirmation Message Card (Global) -->
+    <div id="confirmation-toast" class="fixed bottom-5 right-5 bg-gradient-to-r from-green-600 to-green-800 text-white p-4 rounded-lg shadow-2xl shadow-green-800/50 z-[101] transition-transform duration-500 transform translate-x-full">
+        <p id="toast-message" class="font-semibold flex items-center"><i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Item added to cart!</p>
+    </div>
+
+    <!-- JavaScript for Data, Logic, 3D and Interactivity -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+        
+        // --- THREE.JS GLOBAL VARIABLES ---
+        let scene, camera, renderer, object, geometry, material, animateLoop;
+        let mouseX = 0, mouseY = 0;
+        const targetRotationX = new THREE.Vector2(0, 0);
+
+        // --- GLOBAL STATE ---
+        let cart = JSON.parse(localStorage.getItem('midnight_cart')) || [];
+        let isAuthenticated = localStorage.getItem('midnight_auth') === 'true';
+        let lastProductName = localStorage.getItem('midnight_last_product') || 'No recent transactions recorded.';
+
+        const products = [
+            // 3D Showcase (0-4) - IDs 101-105
+            { id: 101, name: 'Holo Projector V3', price: 32000, status: 'HOT', color: 'blue', img: 'https://placehold.co/400x250/000000/00d9ff?text=Holo+Projector', details: 'Create high-res 3D environments instantly. The V3 features an integrated quantum processor for real-time rendering.' },
+            { id: 102, name: 'Fusion Power Cell', price: 18990, status: 'NEW', color: 'pink', img: 'https://placehold.co/400x250/000000/ff33cc?text=Fusion+Power+Cell', details: 'Infinite energy storage in a minimalist cube. Charges any device wirelessly with a single touch.' },
+            { id: 103, name: 'Kinetic Keyboard', price: 8250, status: 'SALE', color: 'green', img: 'https://placehold.co/400x250/000000/4ade80?text=Kinetic+Keyboard', details: 'Zero latency input device for pro gamers and developers. Fully modular keys with haptic feedback.' },
+            { id: 104, name: 'Nano Earbuds P3', price: 6990, status: '-20%', color: 'purple', img: 'https://placehold.co/400x250/000000/a78bfa?text=Nano+Earbuds', details: 'Spatial audio with active neural noise cancellation. Weighs less than 2 grams for supreme comfort.' },
+            { id: 105, name: 'Exo-Suit Module', price: 65000, status: 'TOP', color: 'orange', img: 'https://placehold.co/400x250/000000/fb923c?text=Exo-Suit+Module', details: 'Enhanced strength and durability for industrial work or extreme sports. Self-calibrating hydraulic assistance.' },
+
+            // Scrolling Rows (5-19) - 15 products - IDs 201-215
+            { id: 201, name: 'Quantum Watch V2', price: 15500, status: 'NEW', img: 'https://placehold.co/400x300/101010/00d9ff?text=Q-Watch+V2', details: 'A next-gen timepiece with neural link.' },
+            { id: 202, name: 'Zero-G Boots', price: 21500, status: 'SALE', img: 'https://placehold.co/400x300/101010/ff33cc?text=Zero-G+Boots', details: 'Magnetic levitation boots for city traversal.' },
+            { id: 203, name: 'Stealth Jacket', price: 19990, status: 'NEW', img: 'https://placehold.co/400x300/101010/00d9ff?text=Stealth+Jacket', details: 'Adaptive camo suit with thermal control.' },
+            { id: 204, name: 'Bio-Sleeve 4k', price: 11000, status: 'HOT', img: 'https://placehold.co/400x300/101010/ff33cc?text=Bio-Sleeve+4K', details: 'Health and performance monitoring sleeve.' },
+            { id: 205, name: 'AI Desk Lamp', price: 4500, status: 'TOP', img: 'https://placehold.co/400x300/101010/00d9ff?text=AI+Desk+Lamp', details: 'Adaptive lighting based on neural activity.' },
+            { id: 206, name: 'Cyberblade Mouse', price: 3800, status: '-10%', img: 'https://placehold.co/400x300/101010/ff33cc?text=Cyberblade+Mouse', details: 'Ergonomic mouse with 0.1ms response time.' },
+            { id: 207, name: 'Digital Backpack', price: 8900, status: 'NEW', img: 'https://placehold.co/400x300/101010/00d9ff?text=Digital+Backpack', details: 'Smart backpack with anti-theft tech.' },
+            { id: 208, name: 'Synth Headset', price: 17000, status: 'TOP', img: 'https://placehold.co/400x300/101010/ff33cc?text=Synth+Headset', details: 'Noise-cancelling, haptic feedback headset.' },
+            { id: 209, name: 'Smart Ring X', price: 5200, status: 'SALE', img: 'https://placehold.co/400x300/101010/00d9ff?text=Smart+Ring+X', details: 'Wearable tech for quick payments and ID.' },
+            { id: 210, name: 'Portable Reactor', price: 45000, status: 'HOT', img: 'https://placehold.co/400x300/101010/ff33cc?text=Portable+Reactor', details: 'Personal micro-fusion power source.' },
+            { id: 211, name: 'Gravity Pad', price: 9500, status: 'NEW', img: 'https://placehold.co/400x300/101010/00d9ff?text=Gravity+Pad', details: 'Wireless charging pad for multiple devices.' },
+            { id: 212, name: 'Cryo Flask', price: 2100, status: 'SALE', img: 'https://placehold.co/400x300/101010/ff33cc?text=Cryo+Flask', details: 'Insulated flask with temperature display.' },
+            { id: 213, name: 'Auto-Clean Bot', price: 14000, status: 'NEW', img: 'https://placehold.co/400x300/101010/00d9ff?text=Auto-Clean+Bot', details: 'Autonomous home cleaning robot.' },
+            { id: 214, name: 'Infrared Goggles', price: 11500, status: 'HOT', img: 'https://placehold.co/400x300/101010/ff33cc?text=IR+Goggles', details: 'Night vision goggles with thermal overlay.' },
+            { id: 215, name: 'Tactical Drone', price: 28000, status: 'TOP', img: 'https://placehold.co/400x300/101010/00d9ff?text=Tactical+Drone', details: 'Compact, high-speed reconnaissance drone.' },
+        ];
+        
+        // --- UTILITY FUNCTIONS ---
+
+        const formatBDT = (amount) => `৳ ${new Intl.NumberFormat('bn-BD').format(amount)}`;
+
+        function showModal(id, product = null) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            if (id === 'details-modal' && product) {
+                renderProductDetails(product);
+            } else if (id === 'cart-modal') {
+                renderCart();
+            } else if (id === 'auth-modal') {
+                updateAuthModal();
+            }
+            lucide.createIcons(); // Ensure icons in the modal are rendered
+        }
+
+        function hideModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // --- AUTH/PROFILE LOGIC ---
+
+        function updateAuthModal() {
+            const authTitle = document.getElementById('auth-title');
+            const authContent = document.getElementById('auth-content');
+            const profileContent = document.getElementById('profile-content');
+            const profileLastProduct = document.getElementById('profile-last-product');
+            const authBtn = document.getElementById('auth-btn');
+            
+            // FIX: Robustly select the icon element, which could be the <i> tag or the generated SVG
+            // We use the selector for the <i> element, which is the direct target for class changes
+            const authIcon = authBtn ? authBtn.querySelector('i') : null; 
+            
+            if (isAuthenticated) {
+                authTitle.textContent = 'User Profile Dashboard';
+                authContent.classList.add('hidden');
+                profileContent.classList.remove('hidden');
+                profileLastProduct.textContent = lastProductName;
+                
+                // Safely modify icon classList (FIX APPLIED HERE)
+                if (authIcon) {
+                    authIcon.classList.add('text-green-400');
+                    authIcon.classList.remove('text-white');
+                }
+            } else {
+                authTitle.textContent = 'Access Control';
+                authContent.classList.remove('hidden');
+                profileContent.classList.add('hidden');
+                document.getElementById('sign-in-form').querySelector('button').textContent = "Authenticate & Sign In";
+                document.getElementById('auth-content').querySelector('button').textContent = "New User Protocol? Register Account";
+                
+                // Safely modify icon classList (FIX APPLIED HERE)
+                if (authIcon) {
+                    authIcon.classList.remove('text-green-400');
+                    authIcon.classList.add('text-white');
+                }
+            }
+        }
+
+        function toggleAuthView(view) {
+            const signInForm = document.getElementById('sign-in-form');
+            const authButton = document.getElementById('auth-content').querySelector('button');
+            const authTitle = document.getElementById('auth-title');
+
+            if (view === 'sign-up') {
+                signInForm.querySelector('button').textContent = "Create Account";
+                authTitle.textContent = 'New User Registration';
+                authButton.textContent = 'Existing User? Authenticate & Sign In';
+                authButton.onclick = () => toggleAuthView('sign-in');
+            } else {
+                signInForm.querySelector('button').textContent = "Authenticate & Sign In";
+                authTitle.textContent = 'Access Control';
+                authButton.textContent = "New User Protocol? Register Account";
+                authButton.onclick = () => toggleAuthView('sign-up');
+            }
+        }
+
+        function simulateLogin(event) {
+            event.preventDefault();
+            isAuthenticated = true;
+            localStorage.setItem('midnight_auth', 'true');
+            hideModal('auth-modal');
+            showToast('Authentication Granted. Welcome back.');
+            updateAuthModal();
+        }
+
+        function simulateLogout() {
+            isAuthenticated = false;
+            localStorage.setItem('midnight_auth', 'false');
+            hideModal('auth-modal');
+            showToast('Session Terminated. Goodbye.');
+            updateAuthModal();
+        }
+
+        // --- CART LOGIC ---
+        
+        function updateCartCounter(animate = false) {
+            const counter = document.getElementById('cart-counter');
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            counter.textContent = count;
+            
+            if (count > 0) {
+                counter.classList.remove('scale-0');
+            } else {
+                counter.classList.add('scale-0');
+            }
+            
+            if (animate) {
+                counter.classList.add('animate-ping');
+                setTimeout(() => counter.classList.remove('animate-ping'), 500);
+            }
+        }
+
+        function addToCart(productId, instantCheckout = false) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === product.id);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            localStorage.setItem('midnight_cart', JSON.stringify(cart));
+            updateCartCounter(true);
+            showToast(`1 unit of ${product.name} added.`);
+
+            // Update last product for profile simulation
+            localStorage.setItem('midnight_last_product', product.name);
+            lastProductName = product.name;
+            
+            if (instantCheckout) {
+                setTimeout(() => {
+                    hideModal('details-modal');
+                    showModal('cart-modal');
+                }, 400);
+            }
+        }
+        
+        function updateQuantity(productId, change) {
+            const item = cart.find(i => i.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== productId);
+                }
+                localStorage.setItem('midnight_cart', JSON.stringify(cart));
+                updateCartCounter();
+                renderCart();
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const totalDisplay = document.getElementById('cart-total-price');
+            const emptyMessage = document.getElementById('cart-empty-message');
+            
+            container.innerHTML = '';
+
+            if (cart.length === 0) {
+                emptyMessage.classList.remove('hidden');
+                totalDisplay.textContent = formatBDT(0);
+                return;
+            } else {
+                 emptyMessage.classList.add('hidden');
+            }
+
+            let total = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                const itemHtml = `
+                    <div class="flex items-center space-x-4 border-b border-gray-800 pb-4">
+                        <img src="${item.img}" onerror="this.src='https://placehold.co/100x100/101010/ffffff?text=Item'" alt="${item.name}" class="w-16 h-16 rounded object-cover border border-gray-700">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-lg text-white">${item.name}</h3>
+                            <p class="text-sm text-gray-400">${formatBDT(item.price)} per unit</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateQuantity(${item.id}, -1)" class="p-1 bg-gray-800 rounded text-primary-color hover:bg-gray-700 transition">
+                                <i data-lucide="minus" class="w-4 h-4"></i>
+                            </button>
+                            <span class="text-white w-6 text-center">${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, 1)" class="p-1 bg-gray-800 rounded text-secondary-color hover:bg-gray-700 transition">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <span class="font-bold text-xl text-white w-24 text-right">${formatBDT(itemTotal)}</span>
+                    </div>
+                `;
+                container.innerHTML += itemHtml;
+            });
+            
+            totalDisplay.textContent = formatBDT(total);
+            lucide.createIcons();
+        }
+
+        // --- DETAILS RENDER ---
+
+        function renderProductDetails(product) {
+            document.getElementById('details-product-name').textContent = product.name;
+            document.getElementById('details-product-img').src = product.img;
+            document.getElementById('details-product-status').textContent = product.status;
+            document.getElementById('details-product-details').textContent = product.details;
+            document.getElementById('details-product-price').textContent = formatBDT(product.price);
+            
+            const cartBtn = document.getElementById('details-add-to-cart-btn');
+            cartBtn.onclick = () => {
+                addToCart(product.id);
+                hideModal('details-modal');
+            };
+        }
+        
+        // --- TOAST/CONFIRMATION MESSAGE ---
+        let toastTimeout;
+        function showToast(message) {
+            clearTimeout(toastTimeout);
+            const toast = document.getElementById('confirmation-toast');
+            document.getElementById('toast-message').innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> ${message}`;
+            toast.classList.remove('translate-x-full');
+            
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3000);
+            
+            lucide.createIcons();
+        }
+
+
+        // --- PRODUCT ROW GENERATION (ON LOAD) ---
+
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card-scroller w-64 flex-shrink-0 bg-gray-900 rounded-xl overflow-hidden shadow-lg transition duration-500 cursor-pointer relative';
+            card.setAttribute('onclick', `showModal('details-modal', products.find(p => p.id === ${product.id}))`);
+            
+            let statusBadge;
+            let statusColor;
+            if (product.status === 'NEW') { statusColor = 'bg-green-600 shadow-green-900'; }
+            else if (product.status === 'HOT') { statusColor = 'bg-yellow-600 shadow-yellow-900'; }
+            else if (product.status.includes('SALE') || product.status.includes('%')) { statusColor = 'bg-red-600 shadow-red-900'; }
+            else { statusColor = 'bg-blue-600 shadow-blue-900'; }
+            statusBadge = `<span class="absolute top-3 left-3 ${statusColor} text-white text-xs font-bold py-1 px-3 rounded-full z-10 shadow-md">${product.status}</span>`;
+
+            card.innerHTML = `
+                ${statusBadge}
+                <div class="p-4">
+                    <img src="${product.img}" onerror="this.src='https://placehold.co/400x300/101010/ffffff?text=Item'" alt="${product.name}" class="w-full h-40 object-cover rounded mb-4 transition-transform duration-500">
+                    <h3 class="text-xl font-bold text-white mb-1 truncate">${product.name}</h3>
+                    <p class="text-gray-400 text-sm mb-3">${product.details.substring(0, 30)}...</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-2xl font-extrabold text-secondary-color">${formatBDT(product.price)}</span>
+                        <button onclick="event.stopPropagation(); addToCart(products.find(p => p.id === ${product.id}).id)" class="bg-primary-color text-gray-900 text-sm font-bold py-1.5 px-3 rounded-full hover:bg-primary-color/80 transition duration-300 flex items-center shadow-lg hover:shadow-primary-color/50">
+                            <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Add
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function renderProductRows() {
+            // Products 5-19 are for the scrolling rows (15 products)
+            const scrollerProducts = products.slice(5, 20); 
+
+            const row1 = document.getElementById('product-row-1');
+            const row2 = document.getElementById('product-row-2');
+            const row3 = document.getElementById('product-row-3');
+
+            const productsRow1 = scrollerProducts.slice(0, 5);
+            const productsRow2 = scrollerProducts.slice(5, 10);
+            const productsRow3 = scrollerProducts.slice(10, 15);
+
+            [
+                { container: row1, data: productsRow1 },
+                { container: row2, data: productsRow2 },
+                { container: row3, data: productsRow3 },
+            ].forEach(({ container, data }) => {
+                // Duplicate and render products twice for seamless loop effect
+                const combinedData = [...data, ...data];
+                
+                combinedData.forEach(product => {
+                    const card = createProductCard(product);
+                    container.appendChild(card);
+                });
+            });
+
+            lucide.createIcons();
+        }
+
+        // --- THREE.JS INITIALIZATION ---
+        function initThreeJS() {
+            const container = document.getElementById('hero-3d-container');
+            const canvas = document.getElementById('hero-canvas');
+            
+            if (!container || !canvas) return;
+
+            // 1. Scene
+            scene = new THREE.Scene();
+
+            // 2. Camera
+            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, canvas: canvas, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            
+            // Handle resizing
+            function onWindowResize() {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+            window.addEventListener('resize', onWindowResize);
+
+            // 4. Lighting
+            const light = new THREE.PointLight(0x00d9ff, 50, 100);
+            light.position.set(5, 5, 5);
+            scene.add(light);
+            
+            const ambientLight = new THREE.AmbientLight(0xff33cc, 0.5);
+            scene.add(ambientLight);
+
+            // 5. Abstract Character (Glowing Wireframe Icosahedron)
+            geometry = new THREE.IcosahedronGeometry(1.5, 0);
+            
+            // Wireframe material (Primary Color)
+            const wireframeMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00d9ff, 
+                wireframe: true, 
+                transparent: true, 
+                opacity: 0.8
+            });
+            
+            // Solid base material (Secondary Color)
+            material = new THREE.MeshPhongMaterial({ 
+                color: 0xff33cc, 
+                shininess: 150, 
+                transparent: true, 
+                opacity: 0.1 
+            });
+            
+            object = new THREE.Group();
+            const solidMesh = new THREE.Mesh(geometry, material);
+            const wireframeMesh = new THREE.Mesh(geometry, wireframeMaterial);
+            
+            // Add a glowing effect using a slightly scaled wireframe clone
+            const glowMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00d9ff, 
+                transparent: true, 
+                opacity: 0.2, 
+                side: THREE.BackSide,
+            });
+            const glowMesh = new THREE.Mesh(geometry, glowMaterial);
+            glowMesh.scale.set(1.1, 1.1, 1.1);
+
+            object.add(solidMesh);
+            object.add(wireframeMesh);
+            object.add(glowMesh);
+            scene.add(object);
+            
+            // 6. Interaction (Mouse movement for rotation)
+            container.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                // Normalize mouse coordinates to -1 to 1
+                mouseX = (e.clientX - rect.left) / rect.width * 2 - 1;
+                mouseY = (e.clientY - rect.top) / rect.height * 2 - 1;
+                
+                // Map to rotation targets
+                targetRotationX.x = mouseY * 0.5;
+                targetRotationX.y = mouseX * 0.5;
+            });
+            
+            // Reset rotation on mouse leave
+             container.addEventListener('mouseleave', () => {
+                targetRotationX.x = 0;
+                targetRotationX.y = 0;
+            });
+
+
+            // 7. Animation Loop
+            animateLoop = () => {
+                requestAnimationFrame(animateLoop);
+                
+                // Gradual rotation based on mouse input
+                object.rotation.x += (targetRotationX.x - object.rotation.x) * 0.05;
+                object.rotation.y += (targetRotationX.y - object.rotation.y) * 0.05;
+
+                // Auto-rotation for background effect
+                object.rotation.y += 0.005;
+                
+                renderer.render(scene, camera);
+            };
+            animateLoop();
+        }
+
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            lucide.createIcons(); 
+            initThreeJS(); // Initialize 3D scene
+            updateCartCounter();
+            renderProductRows(); // Generate the scrolling product cards
+            updateAuthModal(); // Set initial auth state
+        };
+    </script>
+</body>
+</html>
