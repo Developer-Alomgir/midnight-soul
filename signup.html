@@ -193,7 +193,7 @@
     <div class="container">
         <!-- Demo Mode Toggle -->
         <button class="toggle-mode" onclick="toggleDemoMode()">
-            <span id="modeText">🧪 Demo Mode: ON</span>
+            <span id="modeText">🧪 Developer Mode: ON</span>
         </button>
         
         <h1>🛍️ Sign Up</h1>
@@ -201,8 +201,8 @@
         
         <!-- Demo Mode Notice -->
         <div id="demoNotice" class="demo-mode">
-            <strong>🧪 Demo Mode Active</strong><br>
-            SMS won't be sent. OTP will be shown on screen.
+            <strong>🧪 Developer Mode Active</strong><br>
+            Your OTP will be shown on screen.
         </div>
         
         <div id="message" class="message"></div>
@@ -238,7 +238,7 @@
         <div id="otpSection" class="otp-section">
             <!-- Demo OTP Display -->
             <div id="demoOtpDisplay" class="demo-otp-display" style="display: none;">
-                <p style="margin: 0 0 10px 0; color: #666;">Your Demo OTP:</p>
+                <p style="margin: 0 0 10px 0; color: #666;">Your OTP:</p>
                 <strong id="displayedOtp">------</strong>
                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #999;">Copy this OTP and paste below</p>
             </div>
@@ -286,7 +286,7 @@
             const demoNotice = document.getElementById('demoNotice');
             
             if (DEMO_MODE) {
-                modeText.textContent = '🧪 Demo Mode: ON';
+                modeText.textContent = '🧪 Developer Mode: ON';
                 demoNotice.style.display = 'block';
             } else {
                 modeText.textContent = '🚀 Live Mode: ON';
@@ -356,8 +356,8 @@
                     document.getElementById('displayedOtp').textContent = currentOTP;
                     document.getElementById('demoOtpDisplay').style.display = 'block';
                     
-                    showMessage(`✅ Demo OTP generated for ${phone} (${operator})`, 'success');
-                    console.log(`📱 DEMO SMS - Phone: ${phone}, OTP: ${currentOTP}, Operator: ${operator}`);
+                    showMessage(`✅ OTP generated for ${phone} (${operator})`, 'success');
+                    console.log(`📱 SMS - Phone: ${phone}, OTP: ${currentOTP}, Operator: ${operator}`);
                     
                     // Show OTP section
                     document.getElementById('signupForm').style.display = 'none';
