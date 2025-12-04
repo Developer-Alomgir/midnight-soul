@@ -150,12 +150,60 @@
             background: #6c757d;
             margin-top: 10px;
         }
+        
+        .demo-mode {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        .demo-otp-display {
+            background: #e7f3ff;
+            border: 2px dashed #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .demo-otp-display strong {
+            font-size: 24px;
+            color: #2196F3;
+            letter-spacing: 3px;
+        }
+        
+        .toggle-mode {
+            background: #ffc107;
+            color: #333;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Demo Mode Toggle -->
+        <button class="toggle-mode" onclick="toggleDemoMode()">
+            <span id="modeText">🧪 Demo Mode: ON</span>
+        </button>
+        
         <h1>🛍️ Sign Up</h1>
         <p class="subtitle">Create your account to start shopping</p>
+        
+        <!-- Demo Mode Notice -->
+        <div id="demoNotice" class="demo-mode">
+            <strong>🧪 Demo Mode Active</strong><br>
+            SMS won't be sent. OTP will be shown on screen.
+        </div>
         
         <div id="message" class="message"></div>
         
@@ -188,6 +236,13 @@
         
         <!-- Step 2: OTP Verification -->
         <div id="otpSection" class="otp-section">
+            <!-- Demo OTP Display -->
+            <div id="demoOtpDisplay" class="demo-otp-display" style="display: none;">
+                <p style="margin: 0 0 10px 0; color: #666;">Your Demo OTP:</p>
+                <strong id="displayedOtp">------</strong>
+                <p style="margin: 10px 0 0 0; font-size: 12px; color: #999;">Copy this OTP and paste below</p>
+            </div>
+            
             <div class="form-group">
                 <label for="otp">Enter OTP</label>
                 <input type="text" id="otp" placeholder="6-digit OTP" maxlength="6" required>
@@ -216,11 +271,28 @@
     </div>
 
     <script>
-        // ⚠️ IMPORTANT: Replace with your Railway API URL
-        const API_URL = 'https://mongodb-production-e7a9.up.railway.app';
+        // ⚠️ CONFIGURATION
+        const API_URL = 'https://your-app-name.up.railway.app';
+        let DEMO_MODE = true; // Set to false when you have real API keys
         
         let currentUserId = null;
         let currentPhone = null;
+        let currentOTP = null; // Store OTP in demo mode
+        
+        // Toggle demo mode
+        function toggleDemoMode() {
+            DEMO_MODE = !DEMO_MODE;
+            const modeText = document.getElementById('modeText');
+            const demoNotice = document.getElementById('demoNotice');
+            
+            if (DEMO_MODE) {
+                modeText.textContent = '🧪 Demo Mode: ON';
+                demoNotice.style.display = 'block';
+            } else {
+                modeText.textContent = '🚀 Live Mode: ON';
+                demoNotice.style.display = 'none';
+            }
+        }
         
         // Show message function
         function showMessage(text, type = 'success') {
@@ -231,6 +303,23 @@
             setTimeout(() => {
                 messageEl.classList.remove('show');
             }, 5000);
+        }
+        
+        // Generate random OTP
+        function generateOTP() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+        
+        // Detect operator from phone number
+        function detectOperator(phone) {
+            const prefix = phone.substring(0, 4);
+            
+            if (['1701', '1702', '1703', '1704', '1705'].includes(prefix)) return 'Grameenphone';
+            if (['1801', '1802', '1803', '1804', '1805'].includes(prefix)) return 'Robi';
+            if (['1901', '1902', '1903', '1904', '1905'].includes(prefix)) return 'Banglalink';
+            if (['1600', '1601', '1602', '1603'].includes(prefix)) return 'Airtel';
+            
+            return 'SSL Wireless';
         }
         
         // Handle Signup
@@ -255,23 +344,44 @@
             btn.innerHTML = 'Sending OTP <span class="loader"></span>';
             
             try {
-                const response = await fetch(`${API_URL}/api/signup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, phone, email, password })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
+                if (DEMO_MODE) {
+                    // DEMO MODE: Generate OTP locally
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+                    
+                    currentOTP = generateOTP();
                     currentPhone = phone;
-                    showMessage(`OTP sent to ${phone} via ${data.operator}`, 'success');
+                    const operator = detectOperator(phone);
+                    
+                    // Show OTP on screen
+                    document.getElementById('displayedOtp').textContent = currentOTP;
+                    document.getElementById('demoOtpDisplay').style.display = 'block';
+                    
+                    showMessage(`✅ Demo OTP generated for ${phone} (${operator})`, 'success');
+                    console.log(`📱 DEMO SMS - Phone: ${phone}, OTP: ${currentOTP}, Operator: ${operator}`);
                     
                     // Show OTP section
                     document.getElementById('signupForm').style.display = 'none';
                     document.getElementById('otpSection').classList.add('show');
+                    
                 } else {
-                    showMessage(data.error || 'Signup failed', 'error');
+                    // LIVE MODE: Call real API
+                    const response = await fetch(`${API_URL}/api/signup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, phone, email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        currentPhone = phone;
+                        showMessage(`OTP sent to ${phone} via ${data.operator}`, 'success');
+                        
+                        document.getElementById('signupForm').style.display = 'none';
+                        document.getElementById('otpSection').classList.add('show');
+                    } else {
+                        showMessage(data.error || 'Signup failed', 'error');
+                    }
                 }
             } catch (error) {
                 showMessage('Network error. Please try again.', 'error');
@@ -296,23 +406,39 @@
             btn.innerHTML = 'Verifying <span class="loader"></span>';
             
             try {
-                const response = await fetch(`${API_URL}/api/verify-otp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: currentPhone, otp })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    currentUserId = data.userId;
-                    showMessage('Account verified successfully! 🎉', 'success');
+                if (DEMO_MODE) {
+                    // DEMO MODE: Verify locally
+                    await new Promise(resolve => setTimeout(resolve, 800));
                     
-                    // Show payment section
-                    document.getElementById('otpSection').classList.remove('show');
-                    document.getElementById('paymentSection').classList.add('show');
+                    if (otp === currentOTP) {
+                        currentUserId = 'demo_user_' + Date.now();
+                        showMessage('✅ Account verified successfully! 🎉', 'success');
+                        
+                        document.getElementById('otpSection').classList.remove('show');
+                        document.getElementById('paymentSection').classList.add('show');
+                    } else {
+                        showMessage('❌ Invalid OTP. Please try again.', 'error');
+                    }
+                    
                 } else {
-                    showMessage(data.error || 'Invalid OTP', 'error');
+                    // LIVE MODE: Call real API
+                    const response = await fetch(`${API_URL}/api/verify-otp`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: currentPhone, otp })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        currentUserId = data.userId;
+                        showMessage('Account verified successfully! 🎉', 'success');
+                        
+                        document.getElementById('otpSection').classList.remove('show');
+                        document.getElementById('paymentSection').classList.add('show');
+                    } else {
+                        showMessage(data.error || 'Invalid OTP', 'error');
+                    }
                 }
             } catch (error) {
                 showMessage('Network error. Please try again.', 'error');
@@ -337,19 +463,34 @@
             btn.innerHTML = 'Processing <span class="loader"></span>';
             
             try {
-                const response = await fetch(`${API_URL}/api/payment/create`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUserId, amount })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Redirect to bKash payment page
-                    window.location.href = data.bkashURL;
+                if (DEMO_MODE) {
+                    // DEMO MODE: Simulate payment
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    const paymentId = 'DEMO_' + Date.now();
+                    showMessage(`💳 Demo payment of ${amount} BDT created (ID: ${paymentId})`, 'success');
+                    console.log(`💳 DEMO PAYMENT - Amount: ${amount} BDT, Payment ID: ${paymentId}`);
+                    
+                    setTimeout(() => {
+                        alert('In live mode, you will be redirected to bKash payment page.');
+                        skipPayment();
+                    }, 2000);
+                    
                 } else {
-                    showMessage(data.error || 'Payment creation failed', 'error');
+                    // LIVE MODE: Call real API
+                    const response = await fetch(`${API_URL}/api/payment/create`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: currentUserId, amount })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        window.location.href = data.bkashURL;
+                    } else {
+                        showMessage(data.error || 'Payment creation failed', 'error');
+                    }
                 }
             } catch (error) {
                 showMessage('Network error. Please try again.', 'error');
@@ -364,14 +505,18 @@
         function skipPayment() {
             showMessage('Account created successfully! Welcome! 🎉', 'success');
             setTimeout(() => {
-                window.location.href = '/dashboard.html'; // Redirect to dashboard
+                alert('Signup complete! Redirecting to dashboard...');
+                // window.location.href = '/dashboard.html';
+                location.reload(); // For demo, just reload
             }, 2000);
         }
         
         // Go back to signup
         function goBackToSignup() {
             document.getElementById('otpSection').classList.remove('show');
+            document.getElementById('demoOtpDisplay').style.display = 'none';
             document.getElementById('signupForm').style.display = 'block';
+            document.getElementById('otp').value = '';
         }
     </script>
 </body>
